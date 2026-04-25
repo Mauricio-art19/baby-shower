@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Baby Shower</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blush:    #f4c6c6;
+      --rose:     #e8a0a0;
+      --cream:    #fdf6f0;
+      --sage:     #b5c9b0;
+      --gold:     #d4a96a;
+      --text:     #5a3e3e;
+      --muted:    #9a7070;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      overflow: hidden;
+    }
+
+    /* ─── BACKGROUND BUBBLES ─── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.18;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(110vh) scale(1); opacity: 0; }
+      10%  { opacity: 0.18; }
+      90%  { opacity: 0.18; }
+      100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
+    }
+
+    /* ─── STARS ─── */
+    .star {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: var(--gold);
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+      animation: twinkle ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; transform: scale(0.8); }
+      to   { opacity: 1;   transform: scale(1.2); }
+    }
+
+    /* ─── CONFETTI ─── */
+    .confetti-piece {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      animation: confettiFall linear infinite;
+      opacity: 0;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-30px) rotate(0deg);    opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg);  opacity: 0.3; }
+    }
+
+    /* ─── ENVELOPE ─── */
+    #envelope-wrap {
+      position: relative;
+      z-index: 10;
+      cursor: pointer;
+      perspective: 1000px;
+    }
+    #envelope {
+      width: 320px; height: 220px;
+      position: relative;
+      transition: transform 0.8s ease;
+    }
+    #envelope:hover { transform: translateY(-6px); }
+
+    .env-body {
+      width: 100%; height: 100%;
+      background: linear-gradient(145deg, #f9dfe0, #fce9e9);
+      border-radius: 8px 8px 12px 12px;
+      box-shadow: 0 20px 60px rgba(200,120,120,.25), 0 4px 16px rgba(0,0,0,.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .env-body::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 55%;
+      background: linear-gradient(to top, #f2c8c8, transparent);
+    }
+
+    /* flap */
+    .env-flap {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 110px;
+      transform-origin: top center;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(.4,0,.2,1);
+      z-index: 2;
+    }
+    .flap-front, .flap-back {
+      position: absolute;
+      width: 100%; height: 100%;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      backface-visibility: hidden;
+    }
+    .flap-front { background: linear-gradient(160deg, #f7d5d5, #f0bebe); }
+    .flap-back  { background: linear-gradient(160deg, #fae3e3, #f5cbcb); transform: rotateX(180deg); }
+
+    /* side triangles */
+    .env-side {
+      position: absolute;
+      top: 0; height: 100%;
+      width: 50%;
+    }
+    .env-side.left  { left: 0;  clip-path: polygon(0 0, 100% 50%, 0 100%); background: #f0c0c0; }
+    .env-side.right { right: 0; clip-path: polygon(100% 0, 0 50%, 100% 100%); background: #f0c0c0; }
+
+    .env-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 55%;
+      clip-path: polygon(0 100%, 50% 0, 100% 100%);
+      background: #eebbbb;
+    }
+
+    /* seal */
+    .seal {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #e8b89c, var(--gold));
+      box-shadow: 0 4px 14px rgba(212,169,106,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      z-index: 3;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    .open-hint {
+      position: absolute;
+      bottom: -36px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    /* ─── CARD ─── */
+    #card {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      align-items: center;
+      justify-content: center;
+      background: rgba(93,60,60,.25);
+      backdrop-filter: blur(6px);
+      animation: fadeIn 0.5s ease;
+    }
+    #card.show { display: flex; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .card-inner {
+      background: linear-gradient(160deg, #fffaf8, #fdf1ef);
+      border-radius: 20px;
+      padding: 52px 48px;
+      max-width: 460px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 32px 80px rgba(180,100,100,.2), 0 8px 24px rgba(0,0,0,.08);
+      animation: slideUp 0.6s cubic-bezier(.22,1,.36,1);
+      overflow: hidden;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* corner florals */
+    .card-inner::before,
+    .card-inner::after {
+      content: '🌸';
+      position: absolute;
+      font-size: 42px;
+      opacity: 0.25;
+    }
+    .card-inner::before { top: -6px; left: -2px; transform: rotate(-20deg); }
+    .card-inner::after  { bottom: -6px; right: -2px; transform: rotate(160deg); }
+
+    /* decorative border */
+    .card-border {
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(212,169,106,.3);
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    /* ribbon top */
+    .ribbon {
+      display: inline-block;
+      background: linear-gradient(90deg, transparent, var(--blush), transparent);
+      width: 80%;
+      height: 1px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .ribbon::before {
+      content: '✦';
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%,-50%);
+      background: var(--cream);
+      padding: 0 10px;
+      color: var(--gold);
+      font-size: 14px;
+    }
+
+    .label {
+      font-size: 12px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: revealUp 0.6s 0.3s ease forwards;
+    }
+
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(46px, 9vw, 64px);
+      color: var(--rose);
+      line-height: 1.1;
+      opacity: 0;
+      animation: revealUp 0.7s 0.5s ease forwards;
+      text-shadow: 2px 4px 12px rgba(232,160,160,.3);
+    }
+
+    .subtitle {
+      font-size: 13px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin: 14px 0 28px;
+      opacity: 0;
+      animation: revealUp 0.6s 0.7s ease forwards;
+    }
+
+    .baby-icon {
+      font-size: 48px;
+      display: block;
+      margin: 0 auto 24px;
+      opacity: 0;
+      animation: popIn 0.5s 0.9s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes popIn {
+      from { transform: scale(0) rotate(-10deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+    }
+
+    .divider {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 28px auto;
+      opacity: 0;
+      animation: revealUp 0.5s 1s ease forwards;
+    }
+
+    .details-grid {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: revealUp 0.6s 1.1s ease forwards;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .detail-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .detail-value {
+      font-size: 17px;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .message {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--muted);
+      font-style: italic;
+      opacity: 0;
+      animation: revealUp 0.6s 1.3s ease forwards;
+      margin-bottom: 28px;
+    }
+
+    .rsvp-btn {
+      display: inline-block;
+      padding: 13px 36px;
+      background: linear-gradient(135deg, var(--rose), #d4888a);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(232,160,160,.4);
+      opacity: 0;
+      animation: revealUp 0.6s 1.5s ease forwards;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .rsvp-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(232,160,160,.5);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--muted);
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .close-btn:hover { opacity: 1; }
+
+    @keyframes revealUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ─── RSVP MODAL ─── */
+    #rsvp-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      align-items: center;
+      justify-content: center;
+      background: rgba(93,60,60,.35);
+      backdrop-filter: blur(8px);
+    }
+    #rsvp-modal.show { display: flex; }
+
+    .rsvp-box {
+      background: #fffaf8;
+      border-radius: 16px;
+      padding: 40px 36px;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(180,100,100,.2);
+      animation: slideUp 0.5s ease;
+    }
+    .rsvp-box h2 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 42px;
+      color: var(--rose);
+      margin-bottom: 8px;
+    }
+    .rsvp-box p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .rsvp-box input {
+      width: 100%;
+      border: 1px solid #f0c0c0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      color: var(--text);
+      background: #fdf6f0;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .rsvp-box input:focus { border-color: var(--rose); }
+
+    .rsvp-choices { display: flex; gap: 10px; margin-bottom: 20px; }
+    .choice-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #f0c0c0;
+      border-radius: 8px;
+      background: none;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .choice-btn.active, .choice-btn:hover {
+      background: var(--blush);
+      border-color: var(--rose);
+      color: var(--text);
+    }
+    .send-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--rose), #d4888a);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(232,160,160,.4);
+      transition: transform 0.2s;
+    }
+    .send-btn:hover { transform: translateY(-2px); }
+
+    .thank-you {
+      display: none;
+      font-family: 'Great Vibes', cursive;
+      font-size: 38px;
+      color: var(--rose);
+    }
+
+    /* floating hearts */
+    .heart {
+      position: fixed;
+      font-size: 20px;
+      pointer-events: none;
+      animation: floatHeart 2.5s ease-out forwards;
+      z-index: 100;
+    }
+    @keyframes floatHeart {
+      0%   { transform: translateY(0) scale(1);   opacity: 1; }
+      100% { transform: translateY(-200px) scale(0.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- background layer -->
+<div class="bg" id="bg"></div>
+
+<!-- envelope -->
+<div id="envelope-wrap" onclick="openCard()">
+  <div id="envelope">
+    <div class="env-body">
+      <div class="env-side left"></div>
+      <div class="env-side right"></div>
+      <div class="env-bottom"></div>
+      <div class="env-flap" id="flap">
+        <div class="flap-front"></div>
+        <div class="flap-back"></div>
+      </div>
+      <div class="seal" id="seal">🌸</div>
+    </div>
+  </div>
+  <div class="open-hint">Toca para abrir</div>
+</div>
+
+<!-- invitation card -->
+<div id="card">
+  <div class="card-inner">
+    <button class="close-btn" onclick="closeCard()">✕</button>
+    <div class="card-border"></div>
+
+    <div class="ribbon"></div>
+    <p class="label">Estás invitada a un</p>
+    <h1>Baby Shower</h1>
+    <p class="subtitle">para celebrar la llegada de</p>
+
+    <span class="baby-icon">👶🏻</span>
+
+    <div class="divider"></div>
+
+    <div class="details-grid">
+      <div class="detail-item">
+        <span class="detail-label">📅 Fecha</span>
+        <span class="detail-value">Sábado, 14 de Junio de 2026</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">⏰ Hora</span>
+        <span class="detail-value">2:00 PM – 6:00 PM</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">📍 Lugar</span>
+        <span class="detail-value">en mi House<br><small style="font-size:13px;color:#b88">Av. Principal #123, León, Gto.</small></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">🎀 Mamá</span>
+        <span class="detail-value">Liliana Guadalupe Martinez Torres</span>
+      </div>
+    </div>
+
+    <p class="message">
+      "Un pequeño milagro está en camino.<br>
+      Acompáñanos a celebrar con amor, alegría<br>
+      y muchos regalos este momento tan especial."
+    </p>
+
+    <button class="rsvp-btn" onclick="openRsvp()">Confirmar asistencia</button>
+  </div>
+</div>
+
+<!-- RSVP modal -->
+<div id="rsvp-modal">
+  <div class="rsvp-box">
+    <h2>RSVP</h2>
+    <p>¡Nos encantaría saber si podrás acompañarnos!</p>
+    <div id="rsvp-form">
+      <input type="text" id="name-input" placeholder="Tu nombre" />
+      <div class="rsvp-choices">
+        <button class="choice-btn" id="yes-btn" onclick="choose('yes')">✓ Asistiré</button>
+        <button class="choice-btn" id="no-btn"  onclick="choose('no')">✗ No podré</button>
+      </div>
+      <button class="send-btn" onclick="sendRsvp()">Enviar confirmación 💌</button>
+    </div>
+    <div class="thank-you" id="ty-msg">¡Gracias! 🌸</div>
+  </div>
+</div>
+
+<script>
+  /* ── BACKGROUND ELEMENTS ── */
+  const bg = document.getElementById('bg');
+
+  // bubbles
+  const bubbleColors = ['#f4c6c6','#b5c9b0','#d4a96a','#f9dfe0','#fce9e9'];
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 30 + Math.random() * 80;
+    b.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;
+      background:${bubbleColors[Math.floor(Math.random()*bubbleColors.length)]};
+      animation-duration:${8+Math.random()*10}s;
+      animation-delay:${-Math.random()*10}s;
+    `;
+    bg.appendChild(b);
+  }
+
+  // stars
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${-Math.random()*3}s;
+      transform: scale(${0.5+Math.random()});
+    `;
+    bg.appendChild(s);
+  }
+
+  // confetti
+  const confColors = ['#f4c6c6','#b5c9b0','#d4a96a','#a0c4b5','#f0bebe'];
+  for (let i = 0; i < 25; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${confColors[Math.floor(Math.random()*confColors.length)]};
+      animation-duration:${4+Math.random()*6}s;
+      animation-delay:${-Math.random()*6}s;
+      border-radius:${Math.random()>.5?'50%':'2px'};
+    `;
+    bg.appendChild(c);
+  }
+
+  /* ── ENVELOPE OPEN ── */
+  function openCard() {
+    document.getElementById('flap').style.transform = 'rotateX(-180deg)';
+    document.getElementById('seal').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('envelope-wrap').style.display = 'none';
+      document.getElementById('card').classList.add('show');
+      spawnHearts(document.body, 8);
+    }, 700);
+  }
+
+  function closeCard() {
+    document.getElementById('card').classList.remove('show');
+    document.getElementById('envelope-wrap').style.display = '';
+    document.getElementById('flap').style.transform = '';
+    document.getElementById('seal').style.opacity = '1';
+  }
+
+  /* ── RSVP ── */
+  let choice = null;
+
+  function openRsvp() {
+    document.getElementById('rsvp-modal').classList.add('show');
+  }
+
+  function choose(val) {
+    choice = val;
+    document.getElementById('yes-btn').classList.toggle('active', val==='yes');
+    document.getElementById('no-btn').classList.toggle('active',  val==='no');
+  }
+
+  function sendRsvp() {
+    const name = document.getElementById('name-input').value.trim();
+    if (!name) { document.getElementById('name-input').style.borderColor='var(--rose)'; return; }
+    if (!choice) { return; }
+
+    document.getElementById('rsvp-form').style.display = 'none';
+    const msg = document.getElementById('ty-msg');
+    msg.style.display = 'block';
+    msg.textContent = choice === 'yes'
+      ? `¡Qué alegría, ${name}! Te esperamos 🌸`
+      : `¡Gracias, ${name}! Estarás en nuestros corazones 💕`;
+
+    spawnHearts(document.getElementById('rsvp-modal'), 12);
+
+    setTimeout(() => {
+      document.getElementById('rsvp-modal').classList.remove('show');
+      document.getElementById('rsvp-form').style.display = '';
+      msg.style.display = 'none';
+      choice = null;
+      document.getElementById('name-input').value = '';
+      document.getElementById('yes-btn').classList.remove('active');
+      document.getElementById('no-btn').classList.remove('active');
+    }, 3000);
+  }
+
+  /* ── FLOATING HEARTS ── */
+  function spawnHearts(container, n) {
+    const emojis = ['💗','🌸','✨','🎀','💕','⭐','🌷'];
+    for (let i = 0; i < n; i++) {
+      setTimeout(() => {
+        const h = document.createElement('div');
+        h.className = 'heart';
+        h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        h.style.left = (20 + Math.random()*60) + 'vw';
+        h.style.top  = (40 + Math.random()*40) + 'vh';
+        h.style.animationDuration = (1.5 + Math.random()) + 's';
+        document.body.appendChild(h);
+        h.addEventListener('animationend', () => h.remove());
+      }, i * 120);
+    }
+  }
+
+  /* click outside RSVP to close */
+  document.getElementById('rsvp-modal').addEventListener('click', function(e){
+    if (e.target === this) this.classList.remove('show');
+  });
+</script>
+</body>
+</html>
