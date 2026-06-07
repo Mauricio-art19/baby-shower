@@ -25,7 +25,8 @@
       align-items: center;
       justify-content: center;
       font-family: 'Cormorant Garamond', serif;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     /* ─── BACKGROUND BUBBLES ─── */
@@ -203,6 +204,10 @@
       font-size: 42px;
       opacity: 0.25;
     }
+    .card-inner {
+  max-height: 90vh;
+  overflow-y: auto;
+}
     .card-inner::before { top: -6px; left: -2px; transform: rotate(-20deg); }
     .card-inner::after  { bottom: -6px; right: -2px; transform: rotate(160deg); }
 
